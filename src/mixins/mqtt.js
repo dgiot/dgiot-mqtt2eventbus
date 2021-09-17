@@ -204,15 +204,16 @@ const dgiotMixin = {
      *@description MqttSubscribe enentbus
      */
     _this.$dgiotBus.$off("MqttSubscribe");
-    _this.$dgiotBus.$on("MqttSubscribe", args => {
+    _this.$dgiotBus.$on("MqttSubscribe", (args={ router, topic }) => {
+      console.log('args', { ...args })
       if (!_.isEmpty(args)) _this.subscribe(args);
     });
     /**
      *@description MqttUnbscribe enentbus
      */
     _this.$dgiotBus.$off("MqttUnbscribe");
-    _this.$dgiotBus.$on("MqttUnbscribe",(topicKey, topic) => {
-      if (topicKey && topic) _this.unsubscribe(topicKey, topic);
+    _this.$dgiotBus.$on("MqttUnbscribe",(router, topic) => {
+      if (router && topic) _this.unsubscribe(router, topic);
     });
     /**
      *@description MqttPublish enentbus
@@ -286,30 +287,29 @@ const dgiotMixin = {
      * @description Bridge the mqtt message from the server to the EventBus of each page
      */
     mqtt2bus(Message,MqttTopic) {
-      const {topic,payloadString} = Message
-      const nowTime = Number(moment().format("x"));
-      const map = Map2Json(MqttTopic);
-      // console.error(map)
-      for (let topicKey in map) {
-        if (checkTopic(map[topicKey].topic, topic)) {
-          dgiotBus.$emit(`${topicKey}`, Message);
-          console.groupCollapsed(
-            "%ciotMqtt SendMsg payloadString",
-            "color:#009a61; font-size: 28px; font-weight: 300"
-          );
-          console.groupEnd();
-          console.table({ topic, topicKey, Message });
-        }
-        if (Number(map[topicKey].endtime) < nowTime)
-          dgiotBus.$emit("MqttUnbscribe", (topicKey, topic))
-
-      }
+      const {topic,payload} = Message
       console.groupCollapsed(
-        "%ciotMqtt mqtt2bus payloadString",
+        "%ciotMqtt SendMsg payloadString",
         "color:#009a61; font-size: 28px; font-weight: 300"
       );
-      console.warn("%c%s", "font-size: 24px;", payloadString);
+      console.table(Message);
       console.groupEnd();
+      const nowTime = Number(moment().format("x"));
+      const map = Map2Json(MqttTopic);
+      for (let topicKey in map) {
+        if (checkTopic(map[topicKey].topic, topic)) {
+          this.$dgiotBus.$emit(`${topicKey}`, Message);
+          console.groupCollapsed(
+            "%ciotMqtt checkTopic Message",
+            "color:#009a61; font-size: 28px; font-weight: 300"
+          );
+          console.log('topicKey',topicKey)
+          console.table({ topic, topicKey, Message });
+          console.groupEnd();
+        }
+        if (Number(map[topicKey].endtime) < nowTime)
+          this.$dgiotBus.$emit("MqttUnbscribe", (topicKey, topic))
+      }
     },
     /**
      *
@@ -594,10 +594,10 @@ const dgiotMixin = {
           "%c%s",
           "color: black;font-size: 24px;",
           "当前重连次数大于" +
-            maxReconnectNum +
-            "次,不再自动重连,重连第" +
-            _this.reconnectNum +
-            "次"
+          maxReconnectNum +
+          "次,不再自动重连,重连第" +
+          _this.reconnectNum +
+          "次"
         );
       }
     },
