@@ -45,8 +45,16 @@ const install = function (Vue) {
        * @param topic
        * @return {*}
        */
-      Key(router,topic){
-        return(md5(router+topic))
+      key(router,topic){
+        return md5(router+topic)
+      },
+      /**
+       *
+       * @param router
+       * @return {*}
+       */
+      router(router){
+        return md5(router)
       },
     },
   });

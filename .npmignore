@@ -13,5 +13,4 @@ yarn-error.log
 .editorconfig
 .babelrc
 .gitignore
-webpack.config.js
 index.html
