@@ -212,7 +212,6 @@ const dgiotMixin = {
      */
     _this.$dgiotBus.$off("MqttUnbscribe");
     _this.$dgiotBus.$on("MqttUnbscribe",(topicKey, topic) => {
-      console.error(topicKey, topic);
       if (topicKey && topic) _this.unsubscribe(topicKey, topic);
     });
     /**
@@ -287,11 +286,9 @@ const dgiotMixin = {
      * @description Bridge the mqtt message from the server to the EventBus of each page
      */
     mqtt2bus(Message,MqttTopic) {
-      console.log(Message)
       const {topic,payloadString} = Message
       const nowTime = Number(moment().format("x"));
       const map = Map2Json(MqttTopic);
-      console.error(nowTime, Message);
       // console.error(map)
       for (let topicKey in map) {
         if (checkTopic(map[topicKey].topic, topic)) {
@@ -480,7 +477,6 @@ const dgiotMixin = {
     onMqttMessage(Message) {
       let _this = this;
       const mqttmsg = parserMqttMsg(Message)
-      console.error(Message,'MessageMessageMessageMessageMessageMessageMessageMessageMessage')
       const {
         destinationName = "destinationName",
         duplicate = false,
@@ -555,10 +551,7 @@ const dgiotMixin = {
      */
     unsubscribe: function(router, topic) {
       const map = this.MqttTopic;
-      console.error(getTopicKey(router, topic))
-      console.error(map)
       map.delete(getTopicKey(router, topic));
-      console.error(map)
       store.dispatch("setMqttTopic", map);
       if (canUnsubscribe(topic, Map2Json(map))) iotMqtt.unsubscribe(topic);
       this.routerAck("unsubscribe");

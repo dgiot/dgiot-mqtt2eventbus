@@ -1,0 +1,8 @@
+src/assets
+src/icons
+public
+dist
+node_modules
+release
+readme
+src/views/platform/testpumplist/pumplist/key-labelText.md
