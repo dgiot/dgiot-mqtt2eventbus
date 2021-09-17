@@ -267,12 +267,7 @@
   } from 'element-ui'
   import i18 from "../utils/i18";
   import _ from "loadsh"
-  import md5 from 'md5'
   import moment from 'moment'
-  function getTopicKey(router, topic) {
-    const key = router + topic
-    return md5(key);
-  }
   export default {
     name: 'dgiot-mqtt-dashboard',
     components: {
@@ -300,7 +295,7 @@
       return {
         count: 0,
         languageKey: moment().format('x'),
-        router: md5('app'),
+        router: 'app',
         topicKey: '',
         momentKey: moment().format('x'),
         allTopics: {},
@@ -360,6 +355,7 @@
       },
     },
     created() {
+      this.router = this.$dgiotBus.router('app')
       this.$dgiotBus.$emit(`MqttStatus`, this.router)
     },
     watch: {
@@ -442,7 +438,7 @@
       },
       Subscribe() {
         if (this.subTopic) {
-          this.topicKey = getTopicKey(this.router, this.subTopic)
+          this.topicKey = this.$dgiotBus.topicKey(this.router, this.subTopic)
           const ttl = 1000 * 60 * 60 * 3
           this.$dgiotBus.$emit('MqttSubscribe', {
             router: this.router,

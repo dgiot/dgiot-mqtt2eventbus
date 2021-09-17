@@ -45,7 +45,7 @@ const install = function (Vue) {
        * @param topic
        * @return {*}
        */
-      key(router,topic){
+      topicKey(router,topic){
         return md5(router+topic)
       },
       /**
@@ -58,7 +58,6 @@ const install = function (Vue) {
       },
     },
   });
-  window.getTopicKey=getTopicKey
   window.dgiotBus=dgiotBus
 //注册到给vue对象的原型上添加全局属性
   Vue.prototype.$dgiotBus = dgiotBus;

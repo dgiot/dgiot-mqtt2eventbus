@@ -71,18 +71,6 @@ function canUnsubscribe(topic, topics) {
 
 /**
  *
- * @param router
- * @param topic
- * @return {*}
- * @description get topic key
- */
-function getTopicKey(router, topic) {
-  const key = router+topic
-  return md5(key);
-}
-
-/**
- *
  * @param subTopic 订阅的topic  包含#和+ 通配符
  * @param pubTopic 发布的topic 一定不包含通配符
  * @return {boolean}
@@ -521,7 +509,8 @@ const dgiotMixin = {
         router
       } = args;
       // 计算topicKey
-      const topicKey = getTopicKey(router,topic);
+      // const topicKey = getTopicKey(router,topic);
+      const topicKey = this.$dgiotBus.topicKey(router,topic);
       const endTime = Number(moment().format("x")) + ttl;
       _this.MapTopic.set(topicKey, {
         topic: topic,
