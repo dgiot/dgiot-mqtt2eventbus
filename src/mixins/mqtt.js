@@ -1,9 +1,10 @@
 import _ from "loadsh";
-import { reconnect, maxReconnectNum } from "../config/index";
+import {reconnect, maxReconnectNum} from "../config/index";
 import iotMqtt from "../utils/iotMqtt";
 import store from "../store";
 import md5 from "md5";
 import moment, {fn} from "moment";
+
 // window.store = store
 /**
  *
@@ -88,6 +89,7 @@ function checkTopic(subTopic, pubTopic) {
     }
   }
 }
+
 function parserMqttMsg(Message) {
   const {
     destinationName = "destinationName",
@@ -97,35 +99,36 @@ function parserMqttMsg(Message) {
     qos = 0,
     retained = false
   } = Message;
-  let type =  'json'
+  let type = 'json'
   let msg = []
   if (_.isTypedArray(Message)) {
     const str = String.fromCharCode.apply(null, new Uint8Array(Message));
     const res = JSON.parse(str);
     type = 'Uint8Array'
     msg = {
-      message:res.Message,
-      topic:destinationName,
+      message: res.Message,
+      topic: destinationName,
       duplicate,
       payloadBytes,
-      qos:qos,
+      qos: qos,
       retained,
-      payload:payloadString,
-      time:moment().format("x")
+      payload: payloadString,
+      time: moment().format("x")
     }
-  }else{
+  } else {
     msg = {
-      payload:payloadString,
-      message:Message,
-      topic:destinationName,
+      payload: payloadString,
+      message: Message,
+      topic: destinationName,
       duplicate,
       payloadBytes,
-      qos:qos,
-      time:moment().format("x")
+      qos: qos,
+      time: moment().format("x")
     }
   }
   return msg
 }
+
 const dgiotMixin = {
   name: "dgiotMixin",
   data() {
@@ -192,15 +195,15 @@ const dgiotMixin = {
      *@description MqttSubscribe enentbus
      */
     _this.$dgiotBus.$off("MqttSubscribe");
-    _this.$dgiotBus.$on("MqttSubscribe", (args={ router, topic }) => {
-      console.log('args', { ...args })
+    _this.$dgiotBus.$on("MqttSubscribe", (args = {router, topic}) => {
+      console.log('args', {...args})
       if (!_.isEmpty(args)) _this.subscribe(args);
     });
     /**
      *@description MqttUnbscribe enentbus
      */
     _this.$dgiotBus.$off("MqttUnbscribe");
-    _this.$dgiotBus.$on("MqttUnbscribe",(router, topic) => {
+    _this.$dgiotBus.$on("MqttUnbscribe", (router, topic) => {
       if (router && topic) _this.unsubscribe(router, topic);
     });
     /**
@@ -216,7 +219,8 @@ const dgiotMixin = {
       }
     );
   },
-  mounted() {},
+  mounted() {
+  },
   methods: {
     /**
      *
@@ -274,8 +278,8 @@ const dgiotMixin = {
      * @return {Vue|*}
      * @description Bridge the mqtt message from the server to the EventBus of each page
      */
-    mqtt2bus(Message,MqttTopic) {
-      const {topic,payload} = Message
+    mqtt2bus(MqttTopic, Message) {
+      const {topic, payload} = Message
       console.groupCollapsed(
         "%ciotMqtt SendMsg payloadString",
         "color:#009a61; font-size: 28px; font-weight: 300"
@@ -291,8 +295,8 @@ const dgiotMixin = {
             "%ciotMqtt checkTopic Message",
             "color:#009a61; font-size: 28px; font-weight: 300"
           );
-          console.log('topicKey',topicKey)
-          console.table({ topic, topicKey, Message });
+          console.log('topicKey', topicKey)
+          console.table({topic, topicKey, Message});
           console.groupEnd();
         }
         if (Number(map[topicKey].endtime) < nowTime)
@@ -327,7 +331,7 @@ const dgiotMixin = {
         );
         console.log("topic:", topic);
         console.table(obj);
-        console.table({ ...obj });
+        console.table({...obj});
         console.groupEnd();
       } catch (err) {
         console.log("error", err);
@@ -364,7 +368,7 @@ const dgiotMixin = {
           store.dispatch("setMqttStatus", true);
           _this.routerAck("connect");
         },
-        error: function(msg = `iotMqtt接失败,自动重连`) {
+        error: function (msg = `iotMqtt接失败,自动重连`) {
           store.dispatch("setConnectStatus");
           // _this.connectLost()
           _this.mqttError(msg);
@@ -372,14 +376,14 @@ const dgiotMixin = {
           store.dispatch("setMqttStatus", false);
           _this.routerAck("disconnected");
         },
-        connectLost: function(msg = `iotMqtt连接丢失`) {
+        connectLost: function (msg = `iotMqtt连接丢失`) {
           // _this.connectLost()
           _this.mqttError(msg);
           store.dispatch("setConnectStatus", "disconnected");
           store.dispatch("setMqttStatus", false);
           _this.routerAck("disconnected");
         },
-        onMessage: function(Message) {
+        onMessage: function (Message) {
           const {
             destinationName = "destinationName",
             duplicate = "duplicate",
@@ -489,17 +493,17 @@ const dgiotMixin = {
         "%ciotMqtt onMessage",
         "color:#009a61; font-size: 28px; font-weight: 300"
       );
-      console.table({ ..._this.consoleTale });
+      console.table({..._this.consoleTale});
       console.groupEnd();
       store.dispatch("setHistoryMsg", _this.HistoryMsg);
-      _this.mqtt2bus(mqttmsg,this.MqttTopic);
+      _this.mqtt2bus(_this.MqttTopic, mqttmsg);
     },
     /**
      *
      * @param args
      * @description mqtt subscription
      */
-    subscribe: function(args) {
+    subscribe: function (args) {
       let _this = this;
       const {
         topic,
@@ -510,7 +514,7 @@ const dgiotMixin = {
       } = args;
       // 计算topicKey
       // const topicKey = getTopicKey(router,topic);
-      const topicKey = this.$dgiotBus.topicKey(router,topic);
+      const topicKey = this.$dgiotBus.topicKey(router, topic);
       const endTime = Number(moment().format("x")) + ttl;
       _this.MapTopic.set(topicKey, {
         topic: topic,
@@ -527,7 +531,7 @@ const dgiotMixin = {
           "%ciotMqtt subscribe",
           "color:#009a61; font-size: 28px; font-weight: 300"
         );
-        console.table({ ...args });
+        console.table({...args});
         console.groupEnd();
       } else console.error("no topic");
       _this.routerAck("subSuccess");
@@ -538,7 +542,7 @@ const dgiotMixin = {
      * @param topic
      * @description mqtt unsubscribe
      */
-    unsubscribe: function(router, topic) {
+    unsubscribe: function (router, topic) {
       const map = this.MqttTopic;
       map.delete(getTopicKey(router, topic));
       store.dispatch("setMqttTopic", map);
@@ -561,7 +565,7 @@ const dgiotMixin = {
      * @param msg
      * @description mqtt reconnect
      */
-    reconnect: function(msg = "自动重连mqtt") {
+    reconnect: function (msg = "自动重连mqtt") {
       const _this = this;
       _this.reconnectNum++;
       const maxReconnectNum =
