@@ -2,8 +2,7 @@ import _ from "loadsh";
 import {reconnect, maxReconnectNum} from "../config/index";
 import iotMqtt from "../utils/iotMqtt";
 import store from "../store";
-import md5 from "md5";
-import moment, {fn} from "moment";
+import moment from "moment";
 
 // window.store = store
 /**
@@ -288,6 +287,7 @@ const dgiotMixin = {
       console.groupEnd();
       const nowTime = Number(moment().format("x"));
       const map = Map2Json(MqttTopic);
+      console.error('map',map)
       for (let topicKey in map) {
         if (checkTopic(map[topicKey].topic, topic)) {
           this.$dgiotBus.$emit(`${topicKey}`, Message);
@@ -523,7 +523,7 @@ const dgiotMixin = {
         created: created,
         qos: qos
       });
-      console.log(_this.MapTopic);
+      console.error('MapTopic',_this.MapTopic);
       store.dispatch("setMqttTopic", _this.MapTopic);
       if (!_.isEmpty(topic)) {
         iotMqtt.subscribe(topic, qos);
