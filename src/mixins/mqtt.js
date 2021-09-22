@@ -148,9 +148,6 @@ const dgiotMixin = {
     connectStatus() {
       return store.state.connectStatus;
     },
-    MqttTopic() {
-      return store.state.MqttTopic;
-    },
     mqttSettings() {
       return store.state.mqttSettings;
     }
@@ -228,9 +225,10 @@ const dgiotMixin = {
      */
     routerAck(type) {
       let _this = this;
+      const MqttTopic = store.state.MqttTopic
       if (_this.pathRouter) {
         let allrouterTopics = [];
-        const jsonTopic = Map2Json(_this.MqttTopic);
+        const jsonTopic = Map2Json(MqttTopic);
         for (let topicKey in jsonTopic) {
           allrouterTopics.push({
             router: jsonTopic[topicKey].router,
@@ -361,8 +359,9 @@ const dgiotMixin = {
         success: (msg = `clientId为${options.clientId},iotMqtt连接成功`) => {
           iotMqtt.mqttStatus = true;
           _this.mqttSuccess(msg);
-          if (!_.isEmpty(this.MqttTopic)) {
-            _this.connectCheckTopic(Map2Json(this.MqttTopic));
+          const MqttTopic = store.state.MqttTopic
+          if (!_.isEmpty(MqttTopic)) {
+            _this.connectCheckTopic(Map2Json(MqttTopic));
           }
           store.dispatch("setConnectStatus", "connected");
           store.dispatch("setMqttStatus", true);
@@ -496,7 +495,8 @@ const dgiotMixin = {
       console.table({..._this.consoleTale});
       console.groupEnd();
       store.dispatch("setHistoryMsg", _this.HistoryMsg);
-      _this.mqtt2bus(_this.MqttTopic, mqttmsg);
+      const MqttTopic = store.state.MqttTopic
+      _this.mqtt2bus(MqttTopic, mqttmsg);
     },
     /**
      *
@@ -526,6 +526,7 @@ const dgiotMixin = {
       console.error('MapTopic',_this.MapTopic);
       store.dispatch("setMqttTopic", _this.MapTopic);
       if (!_.isEmpty(topic)) {
+
         iotMqtt.subscribe(topic, qos);
         console.groupCollapsed(
           "%ciotMqtt subscribe",
@@ -543,7 +544,8 @@ const dgiotMixin = {
      * @description mqtt unsubscribe
      */
     unsubscribe: function (router, topic) {
-      const map = this.MqttTopic;
+      const MqttTopic = store.state.MqttTopic
+      const map = MqttTopic;
       map.delete(getTopicKey(router, topic));
       store.dispatch("setMqttTopic", map);
       if (canUnsubscribe(topic, Map2Json(map))) iotMqtt.unsubscribe(topic);
