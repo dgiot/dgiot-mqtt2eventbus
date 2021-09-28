@@ -546,7 +546,7 @@ const dgiotMixin = {
     unsubscribe: function (router, topic) {
       const MqttTopic = store.state.MqttTopic
       const map = MqttTopic;
-      map.delete(getTopicKey(router, topic));
+      map.delete(this.$dgiotBus.topicKey(router, topic));
       store.dispatch("setMqttTopic", map);
       if (canUnsubscribe(topic, Map2Json(map))) iotMqtt.unsubscribe(topic);
       this.routerAck("unsubscribe");
