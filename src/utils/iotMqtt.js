@@ -36,9 +36,10 @@ const iotMqtt = {
       // store.dispatch('mqttDB/resaveMqttInfo', message)
     }
   },
-  sendMessage: function (topic, obj, qos = 0, retained = true) {
+  sendMessage: function (topic, msg, qos = 0, retained = true) {
     if (iotMqtt.mqttStatus) {
-      let message = new Paho.MQTT.Message(JSON.stringify(obj))
+      // let message = new Paho.MQTT.Message(JSON.stringify(obj))
+      let message = new Paho.MQTT.Message(msg)
       message.destinationName = topic
       // var message = new Paho.MQTT.Message(obj)
       // message.destinationName = topic
