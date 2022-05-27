@@ -319,12 +319,16 @@ const dgiotMixin = {
      * @description Bridge the mqtt message from the server to the EventBus of each page
      */
     mqtt2bus(destinationName, Message) {
+      let _this = this;
       const { topic, payload } = Message
       // console.groupCollapsed(
       //   "%ciotMqtt SendMsg payloadString",
       //   "color:#009a61; font-size: 28px; font-weight: 300"
       // );
-      this.$dgiotBus.$emit(destinationName, Message);
+      const splicTopic = _this.$dgiotBus.getTopicKeyByTopic(destinationName)
+      console.log('destinationName: ', destinationName);
+      console.log('splicTopic: ', splicTopic);
+      this.$dgiotBus.$emit(splicTopic, Message);
       console.log(Message);
       console.log(destinationName);
       console.groupEnd();
