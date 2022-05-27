@@ -113,25 +113,25 @@ function canUnsubscribe(topic, topics) {
   return true;
 }
 
-/**
- *
- * @param subTopic 订阅的topic  包含#和+ 通配符
- * @param pubTopic 发布的topic 一定不包含通配符
- * @return {boolean}
- * @description Check whether the subscribed topic matches the published topic
- */
-function checkTopic(subTopic, pubTopic) {
-  let length = pubTopic.length < subTopic.length ? pubTopic : subTopic; // 返回短的topic 短的topic 包含#/+
-  for (let k in length) {
-    if (subTopic[k] == "#" || subTopic == pubTopic) {
-      return true;
-    } else if (subTopic[k] == "+" || subTopic[k] == subTopic[k]) {
-      // return true
-    } else {
-      return false;
-    }
-  }
-}
+// /**
+//  *
+//  * @param subTopic 订阅的topic  包含#和+ 通配符
+//  * @param pubTopic 发布的topic 一定不包含通配符
+//  * @return {boolean}
+//  * @description Check whether the subscribed topic matches the published topic
+//  */
+// function checkTopic(subTopic, pubTopic) {
+//   let length = pubTopic.length < subTopic.length ? pubTopic : subTopic; // 返回短的topic 短的topic 包含#/+
+//   for (let k in length) {
+//     if (subTopic[k] == "#" || subTopic == pubTopic) {
+//       return true;
+//     } else if (subTopic[k] == "+" || subTopic[k] == subTopic[k]) {
+//       // return true
+//     } else {
+//       return false;
+//     }
+//   }
+// }
 
 function parserMqttMsg(Message) {
   const {
@@ -300,17 +300,17 @@ const dgiotMixin = {
      * @param map
      * @description Check whether the topic in vuex has expired
      */
-    connectCheckTopic(map) {
-      for (let topickey in map) {
-        if (map[topickey].endtime > Number(moment().format("x")))
-          this.subscribe({
-            topickey: topickey,
-            topic: map[topickey].topic,
-            ttl: map[topickey].endtime - Number(moment().format("x"))
-          });
-        else this.unsubscribe(topickey, map[topickey].topic);
-      }
-    },
+    // connectCheckTopic(map) {
+    //   for (let topickey in map) {
+    //     if (map[topickey].endtime > Number(moment().format("x")))
+    //       this.subscribe({
+    //         topickey: topickey,
+    //         topic: map[topickey].topic,
+    //         ttl: map[topickey].endtime - Number(moment().format("x"))
+    //       });
+    //     else this.unsubscribe(topickey, map[topickey].topic);
+    //   }
+    // },
     /**
      *
      * @param topic
@@ -320,12 +320,13 @@ const dgiotMixin = {
      */
     mqtt2bus(destinationName, Message) {
       const { topic, payload } = Message
-      console.groupCollapsed(
-        "%ciotMqtt SendMsg payloadString",
-        "color:#009a61; font-size: 28px; font-weight: 300"
-      );
+      // console.groupCollapsed(
+      //   "%ciotMqtt SendMsg payloadString",
+      //   "color:#009a61; font-size: 28px; font-weight: 300"
+      // );
       this.$dgiotBus.$emit(destinationName, Message);
-      console.table(Message);
+      console.log(Message);
+      console.log(destinationName);
       console.groupEnd();
       // const nowTime = Number(moment().format("x"));
       // const map = Map2Json(MqttTopic);
@@ -405,11 +406,11 @@ const dgiotMixin = {
           _this.mqttSuccess(msg);
           const MqttTopic = store.state.MqttTopic
           if (!_.isEmpty(MqttTopic)) {
-            _this.connectCheckTopic(Map2Json(MqttTopic));
+            // _this.connectCheckTopic(Map2Json(MqttTopic));
           }
           store.dispatch("setConnectStatus", "connected");
           store.dispatch("setMqttStatus", true);
-          _this.routerAck("connect");
+          // _this.routerAck("connect");
         },
         error: function (msg = `iotMqtt接失败,自动重连`) {
           store.dispatch("setConnectStatus");
@@ -417,14 +418,14 @@ const dgiotMixin = {
           _this.mqttError(msg);
           store.dispatch("setConnectStatus", "connectFailure");
           store.dispatch("setMqttStatus", false);
-          _this.routerAck("disconnected");
+          // _this.routerAck("disconnected");
         },
         connectLost: function (msg = `iotMqtt连接丢失`) {
           // _this.connectLost()
           _this.mqttError(msg);
           store.dispatch("setConnectStatus", "disconnected");
           store.dispatch("setMqttStatus", false);
-          _this.routerAck("disconnected");
+          // _this.routerAck("disconnected");
         },
         onMessage: function (Message) {
           const {
@@ -472,7 +473,7 @@ const dgiotMixin = {
       iotMqtt.disconnect();
       store.dispatch("setConnectStatus", "disconnected");
       store.dispatch("setMqttStatus", false);
-      this.routerAck("disconnected");
+      // this.routerAck("disconnected");
     },
     /**
      *
@@ -487,7 +488,7 @@ const dgiotMixin = {
       );
       console.error("%c%s", "color: red;font-size: 24px;", msg);
       console.groupEnd();
-      if (this.isReconnect) {
+      if (_this.isReconnect) {
         _this.reconnect();
       } else console.info("reconnect 为" + reconnect, "不自動重連");
     },
@@ -511,18 +512,18 @@ const dgiotMixin = {
      */
     onMqttMessage(Message) {
       let _this = this;
-      const mqttmsg = parserMqttMsg(Message)
+      // const mqttmsg = parserMqttMsg(Message)
       const {
-        destinationName = "destinationName",
+        destinationName,
         duplicate = false,
         payloadBytes = "payloadBytes",
         payloadString = "payloadString",
         qos = 0,
         retained = false
-      } = mqttmsg;
+      } = Message;
       // 判断是否为二进制
       _this.countNum++ >= 10 ? (_this.countNum = 0) : _this.countNum;
-      _this.HistoryMsg.set(_this.countNum, mqttmsg);
+      // _this.HistoryMsg.set(_this.countNum, mqttmsg);
       const table = {
         destinationName: destinationName,
         duplicate: duplicate,
@@ -535,10 +536,11 @@ const dgiotMixin = {
         "%ciotMqtt onMessage",
         "color:#009a61; font-size: 28px; font-weight: 300"
       );
+      console.log(destinationName)
       console.groupEnd();
-      store.dispatch("setHistoryMsg", _this.HistoryMsg);
+      // store.dispatch("setHistoryMsg", _this.HistoryMsg);
       // const MqttTopic = store.state.MqttTopic
-      _this.mqtt2bus(destinationName, mqttmsg);
+      _this.mqtt2bus(destinationName, Message);
     },
     /**
      *
@@ -577,7 +579,7 @@ const dgiotMixin = {
         console.table({ ...args });
         console.groupEnd();
       } else console.error("no topic");
-      _this.routerAck("subSuccess");
+      // _this.routerAck("subSuccess");
     },
     /**
      *
@@ -591,7 +593,7 @@ const dgiotMixin = {
       map.delete(this.$dgiotBus.topicKey(router, topic));
       store.dispatch("setMqttTopic", map);
       if (canUnsubscribe(topic, Map2Json(map))) iotMqtt.unsubscribe(topic);
-      this.routerAck("unsubscribe");
+      // this.routerAck("unsubscribe");
       console.info("%c%s", "color: green;font-size: 24px;", map);
       console.groupCollapsed(
         "%ciotMqtt unsubscribe",
