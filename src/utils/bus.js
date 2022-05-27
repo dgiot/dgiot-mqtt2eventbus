@@ -12,6 +12,28 @@ import md5 from 'md5'
 function getEventId(type, Identifier = 'dmmd34r23fdew') {
   return md5(type + Identifier)
 }
+/**
+ * [getTopicKeyBypage description]
+ *
+ * @param   {[type]}  pageName  [pageName topic]
+ *
+ * @return  {[type]}            [return topic router]
+ */
+function getTopicKeyBypage(pageName) {
+  return `$dg/user/${pageName}`
+}
+/**
+ * [getTopicKeyByTopic description]
+ *
+ * @param   {[type]}  Topic  [Topic topic]
+ *
+ * @return  {[type]}         [return topicKey]
+ */
+function getTopicKeyByTopic(Topic) {
+  const topicArr = Topic.split('/')
+  topicArr.length = 3
+  return topicArr.join("/")
+}
 const install = function (Vue) {
   const dgiotBus = new Vue({
     methods: {
@@ -21,7 +43,7 @@ const install = function (Vue) {
        * @param args
        */
       emit(event, ...args) {
-        this.$emit(getEventId(event), ...args)
+        this.$emit(event, ...args)
       },
       /**
        *
@@ -29,7 +51,7 @@ const install = function (Vue) {
        * @param callback
        */
       on(event, callback) {
-        this.$on(getEventId(event), callback)
+        this.$on(event, callback)
       },
       /**
        *
@@ -37,7 +59,7 @@ const install = function (Vue) {
        * @param callback
        */
       off(event, callback) {
-        this.$off(getEventId(event), callback)
+        this.$off(event, callback)
       },
       /**
        *
@@ -45,21 +67,44 @@ const install = function (Vue) {
        * @param topic
        * @return {*}
        */
-      topicKey(router,topic){
-        return md5(router+topic)
+      // router = $dg/user/dashboard/32511dbfe5/report
+      topicKey(router) {
+        // router = "$dg/user/dashboard/32511dbfe5/report"
+        // return router.split('/').slice(1).join('/')
+        return md5(router)
       },
       /**
        *
        * @param router
        * @return {*}
        */
-      router(router){
+      router(router) {
         return md5(router)
       },
+      /**
+       * [getTopicKeyBypage description]
+       *
+       * @param   {[type]}  pageName  [pageName description]
+       *
+       * @return  {[type]}            [return description]
+       */
+      getTopicKeyBypage(pageName) {
+        return getTopicKeyBypage(pageName)
+      },
+      /**
+       * [getTopicKeyByTopic description]
+       *
+       * @param   {[type]}  pageName  [pageName description]
+       *
+       * @return  {[type]}            [return description]
+       */
+      getTopicKeyByTopic(Topic) {
+        return getTopicKeyByTopic(Topic)
+      }
     },
   });
-  window.dgiotBus=dgiotBus
-//注册到给vue对象的原型上添加全局属性
+  window.dgiotBus = dgiotBus
+  //注册到给vue对象的原型上添加全局属性
   Vue.prototype.$dgiotBus = dgiotBus;
 };
 export default install;

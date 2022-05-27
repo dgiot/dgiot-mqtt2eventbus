@@ -1,5 +1,5 @@
 import _ from "loadsh";
-import {reconnect, maxReconnectNum} from "../config/index";
+import { reconnect, maxReconnectNum } from "../config/index";
 import iotMqtt from "../utils/iotMqtt";
 import store from "../store";
 import moment from "moment";
@@ -29,6 +29,50 @@ function Map2Json(map) {
  * @return {*[]}
  * @description get route topic
  */
+
+function clearConsole() {
+  const methods = [
+    'assert',
+    'cd',
+    'clear',
+    'count',
+    'countReset',
+    'debug',
+    'dir',
+    'dirxml',
+    'error',
+    'exception',
+    'group',
+    'groupCollapsed',
+    'groupEnd',
+    'info',
+    'log',
+    'markTimeline',
+    'profile',
+    'profileEnd',
+    'select',
+    'table',
+    'time',
+    'timeEnd',
+    'timeStamp',
+    'timeline',
+    'timelineEnd',
+    'trace',
+    'warn',
+  ]
+  let length = methods.length
+  const console = (window.console = window.console || {})
+  let method
+  const noop = function () { }
+  while (length--) {
+    method = methods[length]
+    // define undefined methods as noops to prevent errors
+    if (!console[method]) console[method] = noop
+  }
+}
+
+window.clearConsole = clearConsole()
+
 function getRouteTopic(router, topics) {
   let routerTopics = [];
   for (let k in topics) {
@@ -132,7 +176,6 @@ const dgiotMixin = {
   name: "dgiotMixin",
   data() {
     return {
-      consoleTale: [],
       MapTopic: new Map(),
       HistoryMsg: new Map(),
       countNum: 0,
@@ -191,8 +234,8 @@ const dgiotMixin = {
      *@description MqttSubscribe enentbus
      */
     _this.$dgiotBus.$off("MqttSubscribe");
-    _this.$dgiotBus.$on("MqttSubscribe", (args = {router, topic}) => {
-      console.log('args', {...args})
+    _this.$dgiotBus.$on("MqttSubscribe", (args = { router, topic }) => {
+      console.log('args', { ...args })
       if (!_.isEmpty(args)) _this.subscribe(args);
     });
     /**
@@ -275,31 +318,32 @@ const dgiotMixin = {
      * @return {Vue|*}
      * @description Bridge the mqtt message from the server to the EventBus of each page
      */
-    mqtt2bus(MqttTopic, Message) {
-      const {topic, payload} = Message
+    mqtt2bus(destinationName, Message) {
+      const { topic, payload } = Message
       console.groupCollapsed(
         "%ciotMqtt SendMsg payloadString",
         "color:#009a61; font-size: 28px; font-weight: 300"
       );
+      this.$dgiotBus.$emit(destinationName, Message);
       console.table(Message);
       console.groupEnd();
-      const nowTime = Number(moment().format("x"));
-      const map = Map2Json(MqttTopic);
-      console.error('map',map)
-      for (let topicKey in map) {
-        if (checkTopic(map[topicKey].topic, topic)) {
-          this.$dgiotBus.$emit(`${topicKey}`, Message);
-          console.groupCollapsed(
-            "%ciotMqtt checkTopic Message",
-            "color:#009a61; font-size: 28px; font-weight: 300"
-          );
-          console.log('topicKey', topicKey)
-          console.table({topic, topicKey, Message});
-          console.groupEnd();
-        }
-        if (Number(map[topicKey].endtime) < nowTime)
-          this.$dgiotBus.$emit("MqttUnbscribe", (topicKey, topic))
-      }
+      // const nowTime = Number(moment().format("x"));
+      // const map = Map2Json(MqttTopic);
+      // console.error('map', map)
+      // for (let topicKey in map) {
+      //   if (checkTopic(map[topicKey].topic, topic)) {
+      //     this.$dgiotBus.$emit(`${topicKey}`, Message);
+      //     console.groupCollapsed(
+      //       "%ciotMqtt checkTopic Message",
+      //       "color:#009a61; font-size: 28px; font-weight: 300"
+      //     );
+      //     console.log('topicKey', topicKey)
+      //     console.table({ topic, topicKey, Message });
+      //     console.groupEnd();
+      //   }
+      //   if (Number(map[topicKey].endtime) < nowTime)
+      //     this.$dgiotBus.$emit("MqttUnbscribe", (topicKey, topic))
+      // }
     },
     /**
      *
@@ -329,7 +373,7 @@ const dgiotMixin = {
         );
         console.log("topic:", topic);
         console.table(obj);
-        console.table({...obj});
+        console.table({ ...obj });
         console.groupEnd();
       } catch (err) {
         console.log("error", err);
@@ -487,16 +531,14 @@ const dgiotMixin = {
         qos: qos,
         retained: retained
       };
-      _this.consoleTale.push(table);
       console.groupCollapsed(
         "%ciotMqtt onMessage",
         "color:#009a61; font-size: 28px; font-weight: 300"
       );
-      console.table({..._this.consoleTale});
       console.groupEnd();
       store.dispatch("setHistoryMsg", _this.HistoryMsg);
-      const MqttTopic = store.state.MqttTopic
-      _this.mqtt2bus(MqttTopic, mqttmsg);
+      // const MqttTopic = store.state.MqttTopic
+      _this.mqtt2bus(destinationName, mqttmsg);
     },
     /**
      *
@@ -523,7 +565,7 @@ const dgiotMixin = {
         created: created,
         qos: qos
       });
-      console.error('MapTopic',_this.MapTopic);
+      console.error('MapTopic', _this.MapTopic);
       store.dispatch("setMqttTopic", _this.MapTopic);
       if (!_.isEmpty(topic)) {
 
@@ -532,7 +574,7 @@ const dgiotMixin = {
           "%ciotMqtt subscribe",
           "color:#009a61; font-size: 28px; font-weight: 300"
         );
-        console.table({...args});
+        console.table({ ...args });
         console.groupEnd();
       } else console.error("no topic");
       _this.routerAck("subSuccess");
