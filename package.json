@@ -75,7 +75,7 @@
     "eslint-friendly-formatter": "3.0.0",
     "eslint-loader": "1.9.0",
     "eslint-plugin-html": "3.2.2",
-    "eslint-plugin-import": "2.24.2",
+    "eslint-plugin-import": "2.25.3",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "5.1.0",
     "eslint-plugin-standard": "3.1.0",
